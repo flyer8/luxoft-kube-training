@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: probe-startup-task
+spec:
+  restartPolicy: Never
+  containers:
+    - name: bash
+      image: bash
+      imagePullPolicy: IfNotPresent
+      resources: { limits: { cpu: "0.1", memory: "20Mi" } }
+      lifecycle:
+        preStop:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - |
+                touch /app/terminate.me
+      startupProbe:
+        initialDelaySeconds: 0
+        failureThreshold: 4
+        periodSeconds: 3
+        exec:
+          command:
+            - /bin/sh
+            - -c
+            - |
+              source /app/echotime.sh
+              if [ ! -e /tmp/startup ]; then
+                echotime Startup FAILED >> /app/my.log
+                exit 1
+              fi
+              echotime Startup OK >> /app/my.log
+              exit 0
+      command:
+        - /bin/sh
+        - -c
+        - |-
+          mkdir -p /app
+          cat << 'EOF' > /app/echotime.sh
+          echotime() {
+            echo $(date +'%Y.%m.%d %H:%M:%S') $@
+          }
+          EOF
+
+          source /app/echotime.sh
+          trap "echo got TERM but ignored" TERM
+          trap "echo got USR1; exit" USR1
+
+          {
+            sleep 10
+            touch /tmp/startup
+            echotime "--> Started!"
+          } &
+
+          echotime Starting
+          touch /app/my.log /app/my.log.old
+          while [ ! -e /app/terminate.me ]; do
+            sleep 0.5
+            diff /app/my.log.old /app/my.log -u | tail -n +4 | sed -ne 's/^+//p'
+            cp /app/my.log /app/my.log.old
+          done
+          echotime Bye

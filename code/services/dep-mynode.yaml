@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mynode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mynode
+  template:
+    metadata:
+      labels:
+        app: mynode
+        inservice: myservice
+    spec:
+      containers:
+        - name: mynode
+          image: docker.io/burrsutter/mynode:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000

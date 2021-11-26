@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo
+data:
+  log.verbosity: debug
+  game.properties: |
+    enemy.types=aliens,monsters
+    player.maximum-lives=5
+binaryData:
+  image: KOKMkOKWoF/ilqApCg==

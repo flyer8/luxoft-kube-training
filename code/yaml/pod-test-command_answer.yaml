@@ -1,0 +1,23 @@
+# kubectl create -f yaml/pod-test-command.yaml
+# kubectl logs test-command
+# kubectl delete pod test-command
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-test-command
+spec:
+  containers:
+    - name: busybox-container
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      command:
+        - /bin/sh
+        - -c
+        - |-
+          echo Start
+          for i in 1 2 3; do
+            echo In Progress $i...
+            sleep 1
+          done
+          echo Finish
+  restartPolicy: Never

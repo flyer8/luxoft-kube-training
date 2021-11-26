@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-volume-emptydir
+spec:
+  volumes:
+    - name: logs-volume
+      emptyDir: {}
+  containers:
+    - name: busybox
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      resources: { limits: { cpu: "0.1", memory: "50Mi" } }
+      args:
+        - /bin/sh
+        - -c
+        - |
+          echo Tail is ...
+          tail /logs/time.txt
+          for i in $(seq 1 3); do
+            date +'%Y.%m.%d %H:%M:%S'
+            sleep 5
+          done | tee -a /logs/time.txt
+          false
+      volumeMounts:
+        - mountPath: /logs
+          name: logs-volume
+  restartPolicy: OnFailure

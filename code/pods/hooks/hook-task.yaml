@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hook-task
+spec:
+  restartPolicy: Never
+  containers:
+    - name: bash
+      image: bash
+      imagePullPolicy: IfNotPresent
+      resources: { limits: { cpu: "0.1", memory: "20Mi" } }
+      lifecycle:
+        preStop:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - |
+                # TODO: Put signal sending here
+      command:
+        - /bin/sh
+        - -c
+        - |-
+          mkdir -p /app
+          cat << 'EOF' > /app/echotime.sh
+          echotime() {
+            echo $(date +'%Y.%m.%d %H:%M:%S') $@
+          }
+          EOF
+
+          source /app/echotime.sh
+          trap "echo got TERM but ignored" TERM
+          trap "echo got USR1; exit" USR1
+
+          echotime Starting
+          touch /app/my.log /app/my.log.old
+          while [ ! -e /app/terminate.me ]; do
+            diff /app/my.log.old /app/my.log -u | tail -n +4 | sed -ne 's/^+//p'
+            cp /app/my.log /app/my.log.old
+            sleep 0.5
+          done
+          echotime Bye

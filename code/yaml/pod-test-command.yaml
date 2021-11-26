@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-test-command
+spec:
+  containers:
+    - name: busybox-container
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      command:
+        - /bin/sh
+        - -c
+        - echo Put commands here
+  restartPolicy: Never

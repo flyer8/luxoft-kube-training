@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  minReadySeconds: 0
+  progressDeadlineSeconds: 600
+  replicas: 1
+  paused: false
+  selector:
+    matchLabels:
+      app: nginx
+    matchExpressions:
+      - { key: ver, operator: In, values: ["1", "2"] }
+  template:
+    metadata:
+      labels:
+        app: nginx
+        ver: "1"
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: nginx
+          image: nginx:1.14.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80

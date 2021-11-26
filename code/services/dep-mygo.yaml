@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mygo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mygo
+  template:
+    metadata:
+      labels:
+        app: mygo
+        inservice: myservice
+    spec:
+      containers:
+        - name: mygo
+          image: docker.io/burrsutter/mygo:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000

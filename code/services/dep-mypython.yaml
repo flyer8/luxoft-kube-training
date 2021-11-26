@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mypython
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mypython
+  template:
+    metadata:
+      labels:
+        app: mypython
+        inservice: myservice
+    spec:
+      containers:
+        - name: mypython
+          image: docker.io/burrsutter/mypython:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
